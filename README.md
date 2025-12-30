@@ -25,7 +25,7 @@ The demo shows how specialized agents work together to:
 
 ## Context
 
-Built as a validation prototype for the AI-Native Enterprise Knowledge Platform role, demonstrating the architectural approach outlined in my [strategy document](link-if-you-want).
+Built as a validation prototype for the AI-Native Enterprise Knowledge Platform role, demonstrating the architectural approach outlined in my [strategy document](https://www.notion.so/Enterprise-Knowledge-Platform-From-Search-to-Action-2d9289880e13805d8828ebeda543502c?source=copy_link).
 
 This architecture is based on experience building similar systems:
 - **Disney**: RAG-powered personalization serving 70M users
