@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enterprise Knowledge Platform Demo</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e8edf2 100%);
+      min-height: 100vh;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .animate-spin {
+      animation: spin 1s linear infinite;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    // Lucide icons as inline SVG
+    const Search = ({ size = 24, color = "currentColor" }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2">
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="m21 21-4.35-4.35"></path>
+      </svg>
+    );
+
+    const Database = ({ size = 24, color = "currentColor" }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2">
+        <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+        <path d="M3 5v14c0 1.7 4 3 9 3s9-1.3 9-3V5"></path>
+        <path d="M3 12c0 1.7 4 3 9 3s9-1.3 9-3"></path>
+      </svg>
+    );
+
+    const Brain = ({ size = 24, color = "currentColor" }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2">
+        <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"></path>
+        <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"></path>
+      </svg>
+    );
+
+    const FileText = ({ size = 24, color = "currentColor" }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="16" y1="13" x2="8" y2="13"></line>
+        <line x1="16" y1="17" x2="8" y2="17"></line>
+        <line x1="10" y1="9" x2="8" y2="9"></line>
+      </svg>
+    );
+
+    const CheckCircle = ({ size = 24, color = "currentColor" }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+      </svg>
+    );
+
+    const Loader = ({ size = 24, color = "currentColor", className = "" }) => (
+      <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2">
+        <line x1="12" y1="2" x2="12" y2="6"></line>
+        <line x1="12" y1="18" x2="12" y2="22"></line>
+        <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
+        <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
+        <line x1="2" y1="12" x2="6" y2="12"></line>
+        <line x1="18" y1="12" x2="22" y2="12"></line>
+        <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
+        <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
+      </svg>
+    );
+
+    const EnterpriseKnowledgeDemo = () => {
+      const [stage, setStage] = useState('idle');
+      const [query, setQuery] = useState('');
+      const [showResults, setShowResults] = useState(false);
+
+      const sampleQuery = "What is our data retention policy for customer financial records?";
+
+      const retrievedChunks = [
+        {
+          id: 1,
+          source: "Data Governance Policy v3.2",
+          text: "Customer financial records must be retained for 7 years from the date of account closure per regulatory requirements...",
+          relevance: 0.94
+        },
+        {
+          id: 2,
+          source: "GDPR Compliance Guide",
+          text: "Personal financial data can be stored for legitimate business purposes. After retention period, data must be securely deleted...",
+          relevance: 0.89
+        },
+        {
+          id: 3,
+          source: "IT Security Standards",
+          text: "All financial records stored in encrypted databases. Access logs maintained for audit purposes. Quarterly compliance reviews required...",
+          relevance: 0.82
+        }
+      ];
+
+      const synthesizedAnswer = {
+        text: "Customer financial records must be retained for 7 years from account closure date, in compliance with regulatory requirements. During this period, records are stored in encrypted databases with full access logging. After the 7-year retention period, all data must be securely deleted per GDPR guidelines. The company conducts quarterly compliance reviews to ensure adherence.",
+        confidence: 0.92
+      };
+
+      const citations = [
+        { source: "Data Governance Policy v3.2", section: "Section 4.2", confidence: 0.94 },
+        { source: "GDPR Compliance Guide", section: "Article 12", confidence: 0.89 },
+        { source: "IT Security Standards", section: "Storage Requirements", confidence: 0.82 }
+      ];
+
+      const runDemo = () => {
+        setShowResults(false);
+        setStage('research');
+        
+        setTimeout(() => setStage('synthesis'), 2000);
+        setTimeout(() => setStage('citation'), 4000);
+        setTimeout(() => {
+          setStage('complete');
+          setShowResults(true);
+        }, 6000);
+      };
+
+      const resetDemo = () => {
+        setStage('idle');
+        setShowResults(false);
+        setQuery('');
+      };
+
+      return (
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 20px', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+          {/* Header */}
+          <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+            <h1 style={{ fontSize: '36px', fontWeight: 'bold', color: '#1a1a1a', marginBottom: '12px' }}>
+              Enterprise Knowledge Platform
+            </h1>
+            <p style={{ fontSize: '18px', color: '#666', marginBottom: '8px' }}>
+              Multi-Agent RAG System Demo
+            </p>
+            <p style={{ fontSize: '14px', color: '#999', fontStyle: 'italic' }}>
+              From Search to Synthesis to Action
+            </p>
+          </div>
+
+          {/* Query Input */}
+          <div style={{ background: 'white', borderRadius: '12px', padding: '32px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', marginBottom: '32px' }}>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#333', marginBottom: '12px' }}>
+              Ask a Question
+            </label>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={sampleQuery}
+                style={{
+                  flex: 1,
+                  minWidth: '300px',
+                  padding: '14px 16px',
+                  fontSize: '15px',
+                  border: '2px solid #e5e5e5',
+                  borderRadius: '8px',
+                  outline: 'none'
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
+                onBlur={(e) => e.target.style.borderColor = '#e5e5e5'}
+              />
+              <button
+                onClick={() => {
+                  if (!query) setQuery(sampleQuery);
+                  runDemo();
+                }}
+                disabled={stage !== 'idle' && stage !== 'complete'}
+                style={{
+                  padding: '14px 32px',
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  color: 'white',
+                  background: stage === 'idle' || stage === 'complete' ? '#3b82f6' : '#94a3b8',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: stage === 'idle' || stage === 'complete' ? 'pointer' : 'not-allowed',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+              >
+                <Search size={18} />
+                {stage === 'idle' || stage === 'complete' ? 'Run Demo' : 'Processing...'}
+              </button>
+              {stage === 'complete' && (
+                <button
+                  onClick={resetDemo}
+                  style={{
+                    padding: '14px 24px',
+                    fontSize: '15px',
+                    fontWeight: '600',
+                    color: '#666',
+                    background: 'white',
+                    border: '2px solid #e5e5e5',
+                    borderRadius: '8px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Reset
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Agent Workflow */}
+          {stage !== 'idle' && (
+            <div style={{ background: 'white', borderRadius: '12px', padding: '32px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', marginBottom: '32px' }}>
+              <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#1a1a1a', marginBottom: '24px' }}>
+                Agent Orchestration Workflow
+              </h2>
+              
+              <div style={{ display: 'flex', gap: '24px', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+                {/* Research Agent */}
+                <div style={{ flex: 1, minWidth: '250px' }}>
+                  <div style={{
+                    padding: '20px',
+                    borderRadius: '8px',
+                    border: '2px solid',
+                    borderColor: stage === 'research' ? '#3b82f6' : stage === 'synthesis' || stage === 'citation' || stage === 'complete' ? '#10b981' : '#e5e5e5',
+                    background: stage === 'research' ? '#eff6ff' : stage === 'synthesis' || stage === 'citation' || stage === 'complete' ? '#f0fdf4' : 'white',
+                    transition: 'all 0.3s ease'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                      {stage === 'research' ? (
+                        <Loader size={24} color="#3b82f6" className="animate-spin" />
+                      ) : stage === 'synthesis' || stage === 'citation' || stage === 'complete' ? (
+                        <CheckCircle size={24} color="#10b981" />
+                      ) : (
+                        <Database size={24} color="#94a3b8" />
+                      )}
+                      <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#1a1a1a' }}>
+                        Research Agent
+                      </h3>
+                    </div>
+                    <p style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>
+                      Vector search + metadata filters
+                    </p>
+                    {(stage === 'synthesis' || stage === 'citation' || stage === 'complete') && (
+                      <div style={{ fontSize: '12px', color: '#10b981', fontWeight: '600' }}>
+                        ✓ Retrieved 3 relevant documents
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Arrow - hidden on mobile */}
+                <div style={{ display: 'flex', alignItems: 'center', color: '#cbd5e1', fontSize: '24px' }}>
+                  →
+                </div>
+
+                {/* Synthesis Agent */}
+                <div style={{ flex: 1, minWidth: '250px' }}>
+                  <div style={{
+                    padding: '20px',
+                    borderRadius: '8px',
+                    border: '2px solid',
+                    borderColor: stage === 'synthesis' ? '#3b82f6' : stage === 'citation' || stage === 'complete' ? '#10b981' : '#e5e5e5',
+                    background: stage === 'synthesis' ? '#eff6ff' : stage === 'citation' || stage === 'complete' ? '#f0fdf4' : 'white',
+                    transition: 'all 0.3s ease'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                      {stage === 'synthesis' ? (
+                        <Loader size={24} color="#3b82f6" className="animate-spin" />
+                      ) : stage === 'citation' || stage === 'complete' ? (
+                        <CheckCircle size={24} color="#10b981" />
+                      ) : (
+                        <Brain size={24} color="#94a3b8" />
+                      )}
+                      <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#1a1a1a' }}>
+                        Synthesis Agent
+                      </h3>
+                    </div>
+                    <p style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>
+                      Context-aware answer generation
+                    </p>
+                    {(stage === 'citation' || stage === 'complete') && (
+                      <div style={{ fontSize: '12px', color: '#10b981', fontWeight: '600' }}>
+                        ✓ Generated coherent answer
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Arrow - hidden on mobile */}
+                <div style={{ display: 'flex', alignItems: 'center', color: '#cbd5e1', fontSize: '24px' }}>
+                  →
+                </div>
+
+                {/* Citation Agent */}
+                <div style={{ flex: 1, minWidth: '250px' }}>
+                  <div style={{
+                    padding: '20px',
+                    borderRadius: '8px',
+                    border: '2px solid',
+                    borderColor: stage === 'citation' || stage === 'complete' ? stage === 'complete' ? '#10b981' : '#3b82f6' : '#e5e5e5',
+                    background: stage === 'citation' || stage === 'complete' ? stage === 'complete' ? '#f0fdf4' : '#eff6ff' : 'white',
+                    transition: 'all 0.3s ease'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                      {stage === 'citation' ? (
+                        <Loader size={24} color="#3b82f6" className="animate-spin" />
+                      ) : stage === 'complete' ? (
+                        <CheckCircle size={24} color="#10b981" />
+                      ) : (
+                        <FileText size={24} color="#94a3b8" />
+                      )}
+                      <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#1a1a1a' }}>
+                        Citation Agent
+                      </h3>
+                    </div>
+                    <p style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>
+                      Source attribution + confidence
+                    </p>
+                    {stage === 'complete' && (
+                      <div style={{ fontSize: '12px', color: '#10b981', fontWeight: '600' }}>
+                        ✓ Added 3 source citations
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Results */}
+          {showResults && (
+            <div style={{ background: 'white', borderRadius: '12px', padding: '32px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                <CheckCircle size={28} color="#10b981" />
+                <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#1a1a1a' }}>
+                  Answer Generated
+                </h2>
+              </div>
+
+              {/* Synthesized Answer */}
+              <div style={{ background: '#f8fafc', borderLeft: '4px solid #3b82f6', padding: '20px', borderRadius: '8px', marginBottom: '24px' }}>
+                <p style={{ fontSize: '16px', lineHeight: '1.6', color: '#1a1a1a', marginBottom: '12px' }}>
+                  {synthesizedAnswer.text}
+                </p>
+                <div style={{ fontSize: '13px', color: '#666', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontWeight: '600' }}>Confidence Score:</span>
+                  <div style={{ background: '#e5e5e5', borderRadius: '12px', padding: '4px 12px', fontSize: '12px', fontWeight: '600', color: '#10b981' }}>
+                    {(synthesizedAnswer.confidence * 100).toFixed(0)}%
+                  </div>
+                </div>
+              </div>
+
+              {/* Citations */}
+              <div>
+                <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#1a1a1a', marginBottom: '16px' }}>
+                  Sources
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {citations.map((citation, idx) => (
+                    <div key={idx} style={{
+                      background: '#fafafa',
+                      border: '1px solid #e5e5e5',
+                      borderRadius: '8px',
+                      padding: '16px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      flexWrap: 'wrap',
+                      gap: '12px'
+                    }}>
+                      <div>
+                        <div style={{ fontSize: '14px', fontWeight: '600', color: '#1a1a1a', marginBottom: '4px' }}>
+                          {citation.source}
+                        </div>
+                        <div style={{ fontSize: '13px', color: '#666' }}>
+                          {citation.section}
+                        </div>
+                      </div>
+                      <div style={{
+                        background: citation.confidence >= 0.9 ? '#dcfce7' : '#fef3c7',
+                        color: citation.confidence >= 0.9 ? '#166534' : '#92400e',
+                        padding: '6px 12px',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        fontWeight: '600'
+                      }}>
+                        {(citation.confidence * 100).toFixed(0)}% relevant
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Retrieved Chunks (collapsible) */}
+              <details style={{ marginTop: '24px', cursor: 'pointer' }}>
+                <summary style={{ fontSize: '14px', fontWeight: '600', color: '#666', padding: '12px 0' }}>
+                  View Retrieved Knowledge Chunks (Research Agent Output)
+                </summary>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px' }}>
+                  {retrievedChunks.map((chunk) => (
+                    <div key={chunk.id} style={{
+                      background: '#f8fafc',
+                      border: '1px solid #e5e5e5',
+                      borderRadius: '6px',
+                      padding: '12px'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
+                        <span style={{ fontSize: '12px', fontWeight: '600', color: '#3b82f6' }}>
+                          {chunk.source}
+                        </span>
+                        <span style={{ fontSize: '11px', color: '#666' }}>
+                          Relevance: {(chunk.relevance * 100).toFixed(0)}%
+                        </span>
+                      </div>
+                      <p style={{ fontSize: '13px', color: '#666', lineHeight: '1.5' }}>
+                        {chunk.text}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </details>
+            </div>
+          )}
+
+          {/* Footer */}
+          <div style={{ marginTop: '48px', textAlign: 'center', fontSize: '13px', color: '#999' }}>
+            <p>Prototype demonstrating multi-agent RAG architecture for Enterprise Knowledge Platform</p>
+            <p style={{ marginTop: '8px' }}>Research Agent → Synthesis Agent → Citation Agent</p>
+          </div>
+        </div>
+      );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<EnterpriseKnowledgeDemo />);
+  </script>
+</body>
+</html>
