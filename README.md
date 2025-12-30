@@ -4,7 +4,7 @@
 
 Interactive prototype demonstrating multi-agent RAG architecture for enterprise knowledge management.
 
-## 🔗 [View Live Demo](https://your-username.github.io/enterprise-knowledge-demo/)
+## 🔗 [View Live Demo](https://www.loom.com/share/bd1fa4ea8aa0497cb50487e57c1cae78)
 
 ## Overview
 
